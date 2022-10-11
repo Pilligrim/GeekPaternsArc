@@ -1,4 +1,6 @@
 
+import config.Config;
+import config.ConfigFactory;
 import logger.ConsoleLogger;
 import logger.Logger;
 
@@ -10,13 +12,14 @@ public class HttpServer {
     private static final Logger logger = new ConsoleLogger();
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(8088)) {
-            logger.info("Server started!");
+        Config config = ConfigFactory.create(args);
+        try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
+            logger.info(String.format("Server started at port %d!%n", config.getPort()));
 
             while (true) {
                 Socket socket = serverSocket.accept();
                 logger.info("New client connected!");
-                new Thread(new RequestHandler(new SocketService(socket), new RequestParserImpl(), new ResponseSerializerImpl())).start();
+                new Thread(new RequestHandler(new SocketService(socket), new RequestParserImpl(), new ResponseSerializerImpl(), config)).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
