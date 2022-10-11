@@ -31,11 +31,9 @@ public class RequestHandler implements Runnable {
     public void run() {
         HttpRequest<String> request = requestParser.parse(socketService.readRequest());
         Path path = Paths.get(config.getWwwHome(), request.getUrl());
-        HttpResponse<String> response = new HttpResponse<>();
+        HttpResponse<String> response;
         if (!Files.exists(path)) {
-            response.setStatusCode(ResponseCode.NOT_FOUND);
-            response.addHeader("Content-Type", "text/html; charset=utf-8");
-            response.setBody("<h1>Файл не найден!</h1>");
+            response = HttpResponse.createBuilder().withStatus(ResponseCode.NOT_FOUND).withHeader("Content-Type", "text/html; charset=utf-8").withBody("<h1>Файл не найден!</h1>").build();
             socketService.writeResponse(responseSerializer.serialize(response));
             return;
         }
@@ -43,9 +41,7 @@ public class RequestHandler implements Runnable {
             StringBuilder sb = new StringBuilder();
             Files.readAllLines(path).forEach(sb::append);
 
-            response.setStatusCode(ResponseCode.OK);
-            response.addHeader("Content-Type", "text/html; charset=utf-8");
-            response.setBody(sb.toString());
+            response = HttpResponse.createBuilder().withStatus(ResponseCode.OK).withHeader("Content-Type", "text/html; charset=utf-8").withBody(sb.toString()).build();
             socketService.writeResponse(responseSerializer.serialize(response));
         } catch (IOException e) {
             throw new RuntimeException(e);
