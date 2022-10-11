@@ -16,7 +16,7 @@ public class HttpServer {
             while (true) {
                 Socket socket = serverSocket.accept();
                 logger.info("New client connected!");
-                new Thread(new RequestHandler(new SocketService(socket))).start();
+                new Thread(new RequestHandler(new SocketService(socket), new RequestParserImpl(), new ResponseSerializerImpl())).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
