@@ -1,42 +1,51 @@
+import config.Config;
+import domain.HttpRequest;
+import domain.HttpResponse;
+import domain.ResponseCode;
+import logger.ConsoleLogger;
+import logger.Logger;
+
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class RequestHandler implements Runnable {
-    private static final String WWW = "C:\\Users\\shpn\\IdeaProjects\\GeekPatternsArc\\server\\www";
-    private final SocketService socketService;
 
-    public RequestHandler(SocketService socketService) {
+    private static final Logger logger = new ConsoleLogger();
+
+    private final SocketService socketService;
+    private final RequestParser requestParser;
+    private final ResponseSerializer responseSerializer;
+
+    private final Config config;
+
+    public RequestHandler(SocketService socketService, RequestParser requestParser, ResponseSerializer responseSerializer, Config config) {
         this.socketService = socketService;
+        this.requestParser = requestParser;
+        this.responseSerializer = responseSerializer;
+        this.config = config;
     }
 
     @Override
-
     public void run() {
-        List<String> request = socketService.readRequest();
-        String[] parts = request.get(0).split(" ");
-        Path path = Paths.get(WWW, parts[1]);
+        HttpRequest<String> request = requestParser.parse(socketService.readRequest());
+        Path path = Paths.get(config.getWwwHome(), request.getUrl());
+        HttpResponse<String> response;
         if (!Files.exists(path)) {
-            socketService.writeResponse(
-                    "HTTP/1.1 404 NOT_FOUND\n" +
-                            "Content-Type: text/html; charset=utf-8\n" +
-                            "\n",
-                    new StringReader("<h1>Файл не найден!</h1>\n")
-            );
+            response = HttpResponse.createBuilder().withStatus(ResponseCode.NOT_FOUND).withHeader("Content-Type", "text/html; charset=utf-8").withBody("<h1>Файл не найден!</h1>").build();
+            socketService.writeResponse(responseSerializer.serialize(response));
             return;
         }
         try {
-            socketService.writeResponse("HTTP/1.1 200 OK\n" +
-                            "Content-Type: text/html; charset=utf-8\n" +
-                            "\n",
-                    Files.newBufferedReader(path));
+            StringBuilder sb = new StringBuilder();
+            Files.readAllLines(path).forEach(sb::append);
+
+            response = HttpResponse.createBuilder().withStatus(ResponseCode.OK).withHeader("Content-Type", "text/html; charset=utf-8").withBody(sb.toString()).build();
+            socketService.writeResponse(responseSerializer.serialize(response));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Client disconnected!");
-
+        logger.info("Client disconnected!");
     }
 }
