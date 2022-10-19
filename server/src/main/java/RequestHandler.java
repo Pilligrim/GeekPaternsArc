@@ -1,12 +1,13 @@
+import domain.HttpRequest;
+import domain.HttpResponse;
+import domain.ResponseCode;
 import logger.ConsoleLogger;
 import logger.Logger;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class RequestHandler implements Runnable {
 
@@ -15,25 +16,36 @@ public class RequestHandler implements Runnable {
     private static final Logger logger = new ConsoleLogger();
 
     private final SocketService socketService;
+    private final RequestParser requestParser;
 
-    public RequestHandler(SocketService socketService) {
+    private final ResponseSerializer responseSerializer;
+
+    public RequestHandler(SocketService socketService, RequestParser requestParser, ResponseSerializer responseSerializer) {
         this.socketService = socketService;
+        this.requestParser = requestParser;
+        this.responseSerializer = responseSerializer;
     }
 
     @Override
     public void run() {
-        List<String> request = socketService.readRequest();
-        // TODO use here implementation of interface RequestParser
-        String[] parts = request.get(0).split(" ");
-        Path path = Paths.get(WWW, parts[1]);
+        HttpRequest<String> request = requestParser.parse(socketService.readRequest());
+        Path path = Paths.get(WWW, request.getUrl());
+        HttpResponse<String> response = new HttpResponse<>();
         if (!Files.exists(path)) {
-            // TODO use implementation of interface ResponseSerializer
-            socketService.writeResponse("HTTP/1.1 404 NOT_FOUND\n" + "Content-Type: text/html; charset=utf-8\n" + "\n", new StringReader("<h1>Файл не найден!</h1>\n"));
+            response.setStatusCode(ResponseCode.NOT_FOUND);
+            response.addHeader("Content-Type", "text/html; charset=utf-8");
+            response.setBody("<h1>Файл не найден!</h1>");
+            socketService.writeResponse(responseSerializer.serialize(response));
             return;
         }
         try {
-            // TODO use implementation of interface ResponseSerializer
-            socketService.writeResponse("HTTP/1.1 200 OK\n" + "Content-Type: text/html; charset=utf-8\n" + "\n", Files.newBufferedReader(path));
+            StringBuilder sb = new StringBuilder();
+            Files.readAllLines(path).forEach(sb::append);
+
+            response.setStatusCode(ResponseCode.OK);
+            response.addHeader("Content-Type", "text/html; charset=utf-8");
+            response.setBody(sb.toString());
+            socketService.writeResponse(responseSerializer.serialize(response));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
