@@ -9,18 +9,19 @@ public class HttpResponse<T> {
 
     private ResponseCode status;
     private Map<String, String> headers;
-    private String contentType;
     private T body;
 
-    public HttpResponse(ResponseCode statusCode, Map<String, String> headers, String contentType, T body) {
+    private HttpResponse(ResponseCode statusCode, Map<String, String> headers,  T body) {
         this.status = statusCode;
         this.headers = headers;
-        this.contentType = contentType;
         this.body = body;
     }
 
     public HttpResponse() {
         headers = new HashMap<>();
+    }
+    public static Builder createBuilder() {
+        return new Builder();
     }
 
     public ResponseCode getStatusCode() {
@@ -39,14 +40,6 @@ public class HttpResponse<T> {
         this.headers = headers;
     }
 
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
     public T getBody() {
         return body;
     }
@@ -62,8 +55,38 @@ public class HttpResponse<T> {
     public void addHeaders(Map<String, String> headers) {
         Optional.ofNullable(headers).map(h -> h.entrySet()).orElse(new HashSet<>()).forEach(e -> this.headers.put(e.getKey(), e.getValue()));
     }
+
     public void addHeader(String key, String value) {
         this.headers.put(key, value);
     }
 
+    public static class Builder {
+
+        private final Map<String, String> headers = new HashMap<>();
+        private ResponseCode status;
+        private String body;
+
+        private Builder() {
+        }
+
+        public Builder withStatus(ResponseCode status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder withHeader(String header, String value) {
+            this.headers.put(header, value);
+            return this;
+        }
+
+        public Builder withBody(String body) {
+            this.body = body;
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(status, headers, body);
+        }
+
+    }
 }

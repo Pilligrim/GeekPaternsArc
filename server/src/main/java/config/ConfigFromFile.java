@@ -3,7 +3,7 @@ package config;
 import java.io.IOException;
 import java.util.Properties;
 
-class ConfigFromFile implements Config {
+public class ConfigFromFile implements Config {
 
     private final String wwwHome;
 
@@ -12,7 +12,7 @@ class ConfigFromFile implements Config {
     public ConfigFromFile(String fileName) {
         Properties prop = new Properties();
         try {
-            prop.load(getClass().getResourceAsStream(fileName));
+            prop.load(ConfigFromFile.class.getResourceAsStream(fileName));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

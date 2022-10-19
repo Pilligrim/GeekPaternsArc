@@ -3,13 +3,14 @@ import config.Config;
 import config.ConfigFactory;
 import logger.ConsoleLogger;
 import logger.Logger;
+import logger.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HttpServer {
-    private static final Logger logger = new ConsoleLogger();
+    private static final Logger logger = LoggerFactory.getLogger();
 
     public static void main(String[] args) {
         Config config = ConfigFactory.create(args);

@@ -6,7 +6,7 @@ import java.util.Optional;
 public class RequestParserImpl implements RequestParser {
     @Override
     public HttpRequest parse(List<String> rawRequest) {
-        HttpRequest request = new HttpRequest();
+        HttpRequest.Builder builder = HttpRequest.createBuilder();
         Optional.ofNullable(rawRequest).orElseThrow(() -> new RuntimeException("Request is empty"));
         Boolean isHeader = false;
         Boolean hasBody = false;
@@ -16,8 +16,8 @@ public class RequestParserImpl implements RequestParser {
             line = rawRequest.get(i);
             if (i == 0) {
                 String[] firstLine = line.split(" ");
-                request.setMethod(firstLine[0]);
-                request.setUrl(firstLine[1]);
+                builder.withMethod(firstLine[0]);
+                builder.withUrl(firstLine[1]);
                 isHeader = true;
                 continue;
             }
@@ -27,15 +27,15 @@ public class RequestParserImpl implements RequestParser {
                     continue;
                 }
                 String[] header = line.split(": ");
-                request.addHeader(header[0], header[1]);
+                builder.withHeader(header[0], header[1]);
             }
             if (hasBody) {
                 body.append(line);
             }
         }
         if (hasBody) {
-            request.setBody(body.toString());
+            builder.withBody(body.toString());
         }
-        return request;
+        return builder.build();
     }
 }
