@@ -2,8 +2,8 @@ import config.Config;
 import domain.HttpRequest;
 import domain.HttpResponse;
 import domain.ResponseCode;
-import logger.ConsoleLogger;
 import logger.Logger;
+import logger.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class RequestHandler implements Runnable {
 
-    private static final Logger logger = new ConsoleLogger();
+    private static final Logger logger = LoggerFactory.getLogger();
 
     private final SocketService socketService;
     private final RequestParser requestParser;

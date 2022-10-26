@@ -1,5 +1,5 @@
-import logger.ConsoleLogger;
 import logger.Logger;
+import logger.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SocketService implements Closeable {
-    private static final Logger logger = new ConsoleLogger();
+    private static final Logger logger = LoggerFactory.getLogger();
     private final Socket socket;
 
     public SocketService(Socket socket) {
