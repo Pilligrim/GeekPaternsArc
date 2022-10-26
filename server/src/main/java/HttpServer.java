@@ -1,13 +1,12 @@
-
 import config.Config;
 import config.ConfigFactory;
-import logger.ConsoleLogger;
 import logger.Logger;
 import logger.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class HttpServer {
     private static final Logger logger = LoggerFactory.getLogger();
@@ -23,7 +22,7 @@ public class HttpServer {
                 new Thread(new RequestHandler(new SocketService(socket), new RequestParserImpl(), new ResponseSerializerImpl(), config)).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
         }
     }
 }

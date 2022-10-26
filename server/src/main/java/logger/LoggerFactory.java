@@ -18,9 +18,15 @@ public class LoggerFactory {
             throw new IllegalStateException(e);
         }
         LoggerType loggerType = LoggerType.valueOf(prop.getProperty("logger"));
+        String fileName = prop.getProperty("logger.fileName");
         switch (loggerType) {
             case CONSOLE:
                 return new ConsoleLogger();
+            case FILE:
+                if (fileName == null || fileName.isEmpty()) {
+                    throw new RuntimeException("Please fill logger.fileName in server.properties");
+                }
+                return new FileLogger(new ConsoleLogger(), fileName);
         }
         return new ConsoleLogger();
     }
