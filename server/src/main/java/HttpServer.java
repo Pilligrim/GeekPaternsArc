@@ -1,7 +1,10 @@
 import config.Config;
 import config.ConfigFactory;
+import handler.AnnotatedHandlerFactory;
+import handler.RequestHandler;
 import logger.Logger;
 import logger.LoggerFactory;
+import service.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -19,7 +22,12 @@ public class HttpServer {
             while (true) {
                 Socket socket = serverSocket.accept();
                 logger.info("New client connected!");
-                new Thread(new RequestHandler(new SocketService(socket), new RequestParserImpl(), new ResponseSerializerImpl(), config)).start();
+                SocketService socketService = SocketServiceFactory.createSocketService(socket);
+                ResponseSerializer responseSerializer = ResponseSerializerFactory.createResponseSerializer();
+                RequestParser requestParser = RequestParserFactory.createRequestParser();
+                new Thread(new RequestHandler(socketService,
+                           requestParser,
+                           AnnotatedHandlerFactory.create(socketService, responseSerializer, config))).start();
             }
         } catch (IOException e) {
             Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
