@@ -2,32 +2,36 @@ package handler;
 
 
 import domain.HttpRequest;
+import domain.HttpResponse;
 import service.RequestParser;
+import service.ResponseSerializer;
 import service.SocketService;
 
 import java.io.IOException;
 import java.util.List;
 
 public class RequestHandler implements Runnable {
+    private final MethodHandlerFactory methodHandlerFactory;
 
     private final SocketService socketService;
     private final RequestParser requestParser;
-    private final MethodHandler methodHandler;
 
-    public RequestHandler(SocketService socketService,
-                          RequestParser requestParser,
-                          MethodHandler methodHandler) {
+
+    private final ResponseSerializer responseSerializer;
+
+    public RequestHandler(MethodHandlerFactory methodHandlerFactory, SocketService socketService, RequestParser requestParser, ResponseSerializer responseSerializer) {
+        this.methodHandlerFactory = methodHandlerFactory;
         this.socketService = socketService;
         this.requestParser = requestParser;
-        this.methodHandler = methodHandler;
+        this.responseSerializer = responseSerializer;
     }
 
     @Override
     public void run() {
-        List<String> rawRequest = socketService.readRequest();
-        HttpRequest httpRequest = requestParser.parse(rawRequest);
-
-        methodHandler.handle(httpRequest);
+        HttpRequest httpRequest = requestParser.parse(socketService.readRequest());
+        MethodHandler methodHandler = methodHandlerFactory.getHandler(httpRequest.getMethod());
+        String rawResponse = responseSerializer.serialize(methodHandler.handle(httpRequest));
+        socketService.writeResponse(rawResponse);
         try {
             socketService.close();
         } catch (IOException e) {

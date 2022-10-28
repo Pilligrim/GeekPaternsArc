@@ -1,7 +1,7 @@
 import config.Config;
 import config.ConfigFactory;
-import handler.AnnotatedHandlerFactory;
 import handler.RequestHandler;
+import handler.MethodHandlerFactory;
 import logger.Logger;
 import logger.LoggerFactory;
 import service.*;
@@ -9,13 +9,13 @@ import service.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class HttpServer {
     private static final Logger logger = LoggerFactory.getLogger();
 
     public static void main(String[] args) {
         Config config = ConfigFactory.create(args);
+        MethodHandlerFactory methodHandlerFactory = new MethodHandlerFactory(config);
         try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
             logger.info(String.format("Server started at port %d!%n", config.getPort()));
 
@@ -25,12 +25,10 @@ public class HttpServer {
                 SocketService socketService = SocketServiceFactory.createSocketService(socket);
                 ResponseSerializer responseSerializer = ResponseSerializerFactory.createResponseSerializer();
                 RequestParser requestParser = RequestParserFactory.createRequestParser();
-                new Thread(new RequestHandler(socketService,
-                           requestParser,
-                           AnnotatedHandlerFactory.create(socketService, responseSerializer, config))).start();
+                new Thread(new RequestHandler(methodHandlerFactory, socketService, requestParser, responseSerializer)).start();
             }
         } catch (IOException e) {
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
+            logger.error(e);
         }
     }
 }

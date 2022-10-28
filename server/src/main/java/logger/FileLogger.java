@@ -20,7 +20,7 @@ public class FileLogger implements Logger{
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
+                logger.error(e);
             }
         }
     }
@@ -31,7 +31,7 @@ public class FileLogger implements Logger{
             FileUtils.writeStringToFile(file, msg + "\n", StandardCharsets.UTF_8, true);
             logger.info(msg);
         } catch (IOException e) {
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
+            logger.error(e);
         }
     }
 
@@ -41,7 +41,7 @@ public class FileLogger implements Logger{
             FileUtils.writeStringToFile(file, msg + "\n", StandardCharsets.UTF_8, true);
             logger.warn(msg);
         } catch (IOException e) {
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
+            logger.error(e);
         }
     }
 
@@ -51,7 +51,12 @@ public class FileLogger implements Logger{
             FileUtils.writeStringToFile(file, msg + "\n", StandardCharsets.UTF_8, true);
             logger.error(msg);
         } catch (IOException e) {
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> logger.error(stackTraceElement.toString()));
+            logger.error(e);
         }
+    }
+
+    @Override
+    public void error(Throwable e) {
+        Arrays.stream(e.getStackTrace()).forEach(stackTraceElement ->error(stackTraceElement.toString()));
     }
 }
