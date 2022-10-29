@@ -2,19 +2,24 @@ package handler;
 
 import config.Config;
 import domain.HttpMethod;
+import domain.HttpRequest;
 import logger.Logger;
 import logger.LoggerFactory;
 import org.reflections.Reflections;
+import service.ResponseSerializer;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
 
-public class MethodHandlerFactory {
+public class MethodHandlerReceiver {
     private static final Logger logger = LoggerFactory.getLogger();
     private static final String HANDLERS_PACKAGE = "handler";
     private final Map<HttpMethod, MethodHandler> handlerMap;
 
-    public MethodHandlerFactory(Config config) {
+    private final ResponseSerializer responseSerializer;
+
+    public MethodHandlerReceiver(Config config, ResponseSerializer responseSerializer) {
+        this.responseSerializer = responseSerializer;
         handlerMap = new HashMap<>();
         Reflections reflections = new Reflections(HANDLERS_PACKAGE);
         List<Class<?>> classes = new ArrayList<>(reflections.getTypesAnnotatedWith(Handler.class));
@@ -35,10 +40,13 @@ public class MethodHandlerFactory {
         return clazz.getAnnotation(Handler.class).method();
     }
 
-    public MethodHandler getHandler(String httpMethod) {
-        return Optional.ofNullable(httpMethod)
+    public String handle(HttpRequest httpRequest) {
+        return Optional.ofNullable(httpRequest)
+                .map(HttpRequest::getMethod)
                 .map(HttpMethod::valueOf)
                 .map(handlerMap::get)
-                .orElseThrow(() -> new RuntimeException(String.format("Unknown http method %s", httpMethod)));
+                .map(m -> m.handle(httpRequest))
+                .map(responseSerializer::serialize)
+                .orElseThrow(() -> new RuntimeException(String.format("Unknown http method %s", httpRequest.getMethod())));
     }
 }

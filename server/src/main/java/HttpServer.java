@@ -1,7 +1,7 @@
 import config.Config;
 import config.ConfigFactory;
 import handler.RequestHandler;
-import handler.MethodHandlerFactory;
+import handler.MethodHandlerReceiver;
 import logger.Logger;
 import logger.LoggerFactory;
 import service.*;
@@ -15,7 +15,8 @@ public class HttpServer {
 
     public static void main(String[] args) {
         Config config = ConfigFactory.create(args);
-        MethodHandlerFactory methodHandlerFactory = new MethodHandlerFactory(config);
+        ResponseSerializer responseSerializer = ResponseSerializerFactory.createResponseSerializer();
+        MethodHandlerReceiver methodHandlerReceiver = new MethodHandlerReceiver(config, responseSerializer);
         try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
             logger.info(String.format("Server started at port %d!%n", config.getPort()));
 
@@ -23,9 +24,8 @@ public class HttpServer {
                 Socket socket = serverSocket.accept();
                 logger.info("New client connected!");
                 SocketService socketService = SocketServiceFactory.createSocketService(socket);
-                ResponseSerializer responseSerializer = ResponseSerializerFactory.createResponseSerializer();
                 RequestParser requestParser = RequestParserFactory.createRequestParser();
-                new Thread(new RequestHandler(methodHandlerFactory, socketService, requestParser, responseSerializer)).start();
+                new Thread(new RequestHandler(methodHandlerReceiver, socketService, requestParser)).start();
             }
         } catch (IOException e) {
             logger.error(e);
