@@ -1,17 +1,23 @@
-import logger.ConsoleLogger;
-import logger.Logger;
+package service;
 
-import java.io.*;
+import logger.Logger;
+import logger.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SocketService implements Closeable {
-    private static final Logger logger = new ConsoleLogger();
+class SocketServiceImpl implements SocketService {
+    private static final Logger logger = LoggerFactory.getLogger();
+
     private final Socket socket;
 
-    public SocketService(Socket socket) {
+    SocketServiceImpl(Socket socket) {
         this.socket = socket;
     }
 

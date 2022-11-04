@@ -1,9 +1,10 @@
-
 import config.Config;
 import config.ConfigFactory;
-import logger.ConsoleLogger;
+import handler.RequestHandler;
+import handler.MethodHandlerReceiver;
 import logger.Logger;
 import logger.LoggerFactory;
+import service.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,16 +15,20 @@ public class HttpServer {
 
     public static void main(String[] args) {
         Config config = ConfigFactory.create(args);
+        ResponseSerializer responseSerializer = ResponseSerializerFactory.createResponseSerializer();
+        MethodHandlerReceiver methodHandlerReceiver = new MethodHandlerReceiver(config, responseSerializer);
         try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
             logger.info(String.format("Server started at port %d!%n", config.getPort()));
 
             while (true) {
                 Socket socket = serverSocket.accept();
                 logger.info("New client connected!");
-                new Thread(new RequestHandler(new SocketService(socket), new RequestParserImpl(), new ResponseSerializerImpl(), config)).start();
+                SocketService socketService = SocketServiceFactory.createSocketService(socket);
+                RequestParser requestParser = RequestParserFactory.createRequestParser();
+                new Thread(new RequestHandler(methodHandlerReceiver, socketService, requestParser)).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 }
