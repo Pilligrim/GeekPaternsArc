@@ -13,10 +13,6 @@ public class HttpRequest<T> {
 
     private String url;
 
-    public static Builder createBuilder() {
-        return new Builder();
-    }
-
     private HttpRequest(String method, String url, Map<String, String> headers, T body) {
         this.method = method;
         this.url = url;
@@ -26,6 +22,10 @@ public class HttpRequest<T> {
 
     public HttpRequest() {
         headers = new HashMap<>();
+    }
+
+    public static Builder createBuilder() {
+        return new Builder();
     }
 
     public String getMethod() {

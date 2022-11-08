@@ -2,7 +2,7 @@ package config;
 
 public interface Config {
 
-    String getWwwHome();
+    String getResource();
 
     int getPort();
 }

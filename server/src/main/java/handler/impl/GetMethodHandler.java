@@ -27,7 +27,7 @@ public class GetMethodHandler implements MethodHandler {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        Path path = Paths.get(config.getWwwHome(), request.getUrl());
+        Path path = Paths.get(config.getResource(), request.getUrl());
 
         if (!Files.exists(path)) {
             return HttpResponse.createBuilder().withStatus(ResponseCode.NOT_FOUND).withHeader("Content-Type", "text/html; charset=utf-8").withBody("<h1>Файл не найден!</h1>").build();

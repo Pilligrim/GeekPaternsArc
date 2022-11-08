@@ -15,7 +15,7 @@ public class Presenter implements ViewListener {
 
     @Override
     public void onButtonClicked() {
-        // Update the model (ie. the state of the application)
+        // Update the model (i.e. the state of the application)
         model.addOneToCount();
         // Update the view
         view.setLabelText(String.valueOf(model.getCount()));

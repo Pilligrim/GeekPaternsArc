@@ -1,6 +1,3 @@
-# Compiled class file
-*.class
-
 # Log file
 *.log
 
@@ -12,9 +9,6 @@
 *.iml
 *.iws
 out
-
-# Log file
-*.log
 
 # Maven
 log/
