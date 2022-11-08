@@ -15,8 +15,6 @@ public class RequestHandler implements Runnable {
     private final RequestParser requestParser;
 
 
-
-
     public RequestHandler(MethodHandlerReceiver methodHandlerReceiver, SocketService socketService, RequestParser requestParser) {
         this.methodHandlerReceiver = methodHandlerReceiver;
         this.socketService = socketService;

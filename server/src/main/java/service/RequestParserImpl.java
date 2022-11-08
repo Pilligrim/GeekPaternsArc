@@ -10,8 +10,8 @@ public class RequestParserImpl implements RequestParser {
     public HttpRequest parse(List<String> rawRequest) {
         HttpRequest.Builder builder = HttpRequest.createBuilder();
         Optional.ofNullable(rawRequest).orElseThrow(() -> new RuntimeException("Request is empty"));
-        Boolean isHeader = false;
-        Boolean hasBody = false;
+        boolean isHeader = false;
+        boolean hasBody = false;
         StringBuilder body = new StringBuilder();
         String line;
         for (int i = 0; i < rawRequest.size(); i++) {

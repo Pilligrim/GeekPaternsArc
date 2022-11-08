@@ -7,7 +7,7 @@ class ConfigFromCli implements Config {
     private final int port;
 
     public ConfigFromCli(String[] args) {
-        if (args.length < 2) {
+        if (args.length != 2) {
             throw new IllegalStateException("No parameters specified");
         }
         this.wwwHome = args[0];
@@ -15,7 +15,7 @@ class ConfigFromCli implements Config {
     }
 
     @Override
-    public String getWwwHome() {
+    public String getResource() {
         return this.wwwHome;
     }
 

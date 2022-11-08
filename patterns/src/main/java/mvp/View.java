@@ -31,7 +31,7 @@ public class View {
         frame.setVisible(true);
     }
 
-    // Iterate through the list, notifying each listner individualy
+    // Iterate through the list, notifying each listener individuality
     private void notifyListenersOnButtonClicked() {
         listeners.forEach(ViewListener::onButtonClicked);
     }
